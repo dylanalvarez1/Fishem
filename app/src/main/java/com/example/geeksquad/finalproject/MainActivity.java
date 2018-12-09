@@ -15,7 +15,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onFishingButtonClick(View view) {
-        Intent i = new Intent(getBaseContext(), FishingActivity.class);
+        Intent i = new Intent(getBaseContext(), RotationActivity.class);
         startActivity(i);
     }
 }

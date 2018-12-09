@@ -1,96 +1,104 @@
 package com.example.geeksquad.finalproject;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.support.v7.app.AppCompatActivity;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
+
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
+import android.view.View;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import static java.lang.Math.PI;
+import org.w3c.dom.Text;
 
-public class RotationActivity extends AppCompatActivity implements SensorEventListener {
-    SensorManager sensorManager;
+import java.util.ArrayList;
+import java.util.List;
+public class RotationActivity extends AppCompatActivity implements
+         SensorEventListener {
+    private final int REQUEST_PERMISSION_ACCESS_FINE_LOCATION=1;
+    private SurfaceHolder holder=null;
+    private Bitmap map=null;
+    private double mapWidth=4504;
+    private double subpixelRatio=1.0;
+    private float zoom=0.5f;
+    private int lastX=0;
+    private int lastY=0;
+    private SensorManager mSensorManager;
+    private final float[] accelerometerReading = new float[3];
+    private final float[] magnetometerReading = new float[3];
+    private final float[] rotationMatrix = new float[9];
+    private final float[] orientationAngles = new float[3];
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_rotation);
-        Sensor mRotationVectorSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
-        sensorManager.registerListener(this, mRotationVectorSensor, SensorManager.SENSOR_DELAY_GAME);
+
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        Sensor accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        if (accelerometer != null) {
+            mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL, SensorManager.SENSOR_DELAY_UI);
+        }
+        Sensor magneticField = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        if (magneticField != null) {
+            mSensorManager.registerListener(this, magneticField, SensorManager.SENSOR_DELAY_NORMAL, SensorManager.SENSOR_DELAY_UI);
+        }
+
     }
 
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int number) {
 
-    }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        final int eventType = event.sensor.getType();
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            System.arraycopy(event.values, 0, accelerometerReading,
+                    0, accelerometerReading.length);
+        } else if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+            System.arraycopy(event.values, 0, magnetometerReading,
+                    0, magnetometerReading.length);
+        }
 
-        if (eventType != Sensor.TYPE_ROTATION_VECTOR) return;
+// Rotation matrix based on current readings from accelerometer and magnetometer.
+        SensorManager.getRotationMatrix(rotationMatrix, null, accelerometerReading, magnetometerReading);
 
-        long timeNow            = System.nanoTime();
-
-        float mOrientationData[] = new float[3];
-        calcOrientation(mOrientationData, event.values.clone());
-
-        // Do what you want with mOrientationData
-    }
-
-    private void calcOrientation(float[] orientation, float[] incomingValues) {
-        // Get the quaternion
-        float[] quatF = new float[4];
-        SensorManager.getQuaternionFromVector(quatF, incomingValues);
-
-        // Get the rotation matrix
-        //
-        // This is a variant on the code presented in
-        // http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToMatrix/
-        // which has been altered for scaling and (I think) a different axis arrangement. It
-        // tells you the rotation required to get from the between the phone's axis
-        // system and the earth's.
-        //
-        // Phone axis system:
-        // https://developer.android.com/guide/topics/sensors/sensors_overview.html#sensors-coords
-        //
-        // Earth axis system:
-        // https://developer.android.com/reference/android/hardware/SensorManager.html#getRotationMatrix(float[], float[], float[], float[])
-        //
-        // Background information:
-        // https://en.wikipedia.org/wiki/Rotation_matrix
-        //
-        float[][] rotMatF = new float[3][3];
-        rotMatF[0][0] = quatF[1]*quatF[1] + quatF[0]*quatF[0] - 0.5f;
-        rotMatF[0][1] = quatF[1]*quatF[2] - quatF[3]*quatF[0];
-        rotMatF[0][2] = quatF[1]*quatF[3] + quatF[2]*quatF[0];
-        rotMatF[1][0] = quatF[1]*quatF[2] + quatF[3]*quatF[0];
-        rotMatF[1][1] = quatF[2]*quatF[2] + quatF[0]*quatF[0] - 0.5f;
-        rotMatF[1][2] = quatF[2]*quatF[3] - quatF[1]*quatF[0];
-        rotMatF[2][0] = quatF[1]*quatF[3] - quatF[2]*quatF[0];
-        rotMatF[2][1] = quatF[2]*quatF[3] + quatF[1]*quatF[0];
-        rotMatF[2][2] = quatF[3]*quatF[3] + quatF[0]*quatF[0] - 0.5f;
-
-        // Get the orientation of the phone from the rotation matrix
-        //
-        // There is some discussion of this at
-        // http://stackoverflow.com/questions/30279065/how-to-get-the-euler-angles-from-the-rotation-vector-sensor-type-rotation-vecto
-        // in particular equation 451.
-        //
-        final float rad2deg = (float)(180.0 / PI);
-        orientation[0] = (float)Math.atan2(-rotMatF[1][0], rotMatF[0][0]) * rad2deg;
-        orientation[1] = (float)Math.atan2(-rotMatF[2][1], rotMatF[2][2]) * rad2deg;
-        orientation[2] = (float)Math.asin ( rotMatF[2][0])                * rad2deg;
-        if (orientation[0] < 0) orientation[0] += 360;
-
+// Express the updated rotation matrix as three orientation angles.
+        SensorManager.getOrientation(rotationMatrix, orientationAngles);
         TextView current1 = findViewById(R.id.currentX);
         TextView current2 = findViewById(R.id.currentY);
         TextView current3 = findViewById(R.id.currentZ);
 
-        current1.setText("orientation 1: " + orientation[0]);
-        current2.setText("orientation 2: " + orientation[1]);
-        current3.setText("orientation 3: " + orientation[2]);
+        current1.setText("" + rotationMatrix[0]);
+        current2.setText("" + rotationMatrix[1]);
+        current3.setText("" + rotationMatrix[2]);
+
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
     }
 }
+
