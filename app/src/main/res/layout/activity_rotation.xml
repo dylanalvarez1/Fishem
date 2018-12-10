@@ -7,7 +7,14 @@
     tools:context=".RotationActivity">
     <LinearLayout android:paddingTop="20sp" android:orientation="vertical" android:gravity="center" android:background="#ffffff" android:layout_gravity="center" android:layout_height="match_parent" android:layout_width="match_parent" xmlns:android="http://schemas.android.com/apk/res/android">
 
-        <TextView android:layout_gravity="center" android:layout_height="wrap_content" android:layout_width="wrap_content" android:textSize="20sp" android:text="Current Acceleration:" android:layout_marginBottom="10sp" android:layout_marginTop="30sp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="30sp"
+            android:layout_marginBottom="10sp"
+            android:text="Current Orientation:"
+            android:textSize="20sp" />
 
 
         <LinearLayout android:orientation="horizontal" android:gravity="center|top" android:background="#ffffff" android:layout_height="match_parent" android:layout_width="match_parent">

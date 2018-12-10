@@ -36,8 +36,7 @@ import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
-public class RotationActivity extends AppCompatActivity implements
-         SensorEventListener {
+public class RotationActivity extends AppCompatActivity implements SensorEventListener {
     private final int REQUEST_PERMISSION_ACCESS_FINE_LOCATION=1;
     private SurfaceHolder holder=null;
     private Bitmap map=null;
@@ -47,10 +46,13 @@ public class RotationActivity extends AppCompatActivity implements
     private int lastX=0;
     private int lastY=0;
     private SensorManager mSensorManager;
-    private final float[] accelerometerReading = new float[3];
-    private final float[] magnetometerReading = new float[3];
+    private float[] accelerometerReading = new float[3];
+    private float[] magnetometerReading = new float[3];
     private final float[] rotationMatrix = new float[9];
     private final float[] orientationAngles = new float[3];
+
+    //lower alpha should equal smoother movement
+    private static final float ALPHA = 0.005f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,16 +71,24 @@ public class RotationActivity extends AppCompatActivity implements
 
     }
 
+    private float[] applyLowPassFilter(float[] input, float[] output) {
+        if ( output == null ) return input;
 
+        for ( int i=0; i<input.length; i++ ) {
+            output[i] = output[i] + ALPHA * (input[i] - output[i]);
+        }
+        return output;
+    }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            System.arraycopy(event.values, 0, accelerometerReading,
-                    0, accelerometerReading.length);
+            System.arraycopy(event.values, 0, accelerometerReading, 0, accelerometerReading.length);
+            //accelerometerReading = applyLowPassFilter(event.values, accelerometerReading);
+
         } else if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
-            System.arraycopy(event.values, 0, magnetometerReading,
-                    0, magnetometerReading.length);
+            System.arraycopy(event.values, 0, magnetometerReading, 0, magnetometerReading.length);
+            //magnetometerReading = applyLowPassFilter(event.values, magnetometerReading);
         }
 
 // Rotation matrix based on current readings from accelerometer and magnetometer.
@@ -86,13 +96,18 @@ public class RotationActivity extends AppCompatActivity implements
 
 // Express the updated rotation matrix as three orientation angles.
         SensorManager.getOrientation(rotationMatrix, orientationAngles);
+
         TextView current1 = findViewById(R.id.currentX);
         TextView current2 = findViewById(R.id.currentY);
         TextView current3 = findViewById(R.id.currentZ);
 
-        current1.setText("" + rotationMatrix[0]);
-        current2.setText("" + rotationMatrix[1]);
-        current3.setText("" + rotationMatrix[2]);
+        //current1.setText("" + rotationMatrix[0]);
+        //current2.setText("" + rotationMatrix[1]);
+        //current3.setText("" + rotationMatrix[2]);
+
+        current1.setText("" + Math.round(Math.toDegrees(orientationAngles[0])));
+        current2.setText("" + Math.round(Math.toDegrees(orientationAngles[1])));
+        current3.setText("" + Math.round(Math.toDegrees(orientationAngles[2])));
 
     }
 
