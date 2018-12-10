@@ -17,12 +17,16 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 
+import android.os.Handler;
+import android.os.VibrationEffect;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Range;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -31,25 +35,29 @@ import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.os.Vibrator;
 
 import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
+
+
+
 public class RotationActivity extends AppCompatActivity implements SensorEventListener {
-    private final int REQUEST_PERMISSION_ACCESS_FINE_LOCATION=1;
-    private SurfaceHolder holder=null;
-    private Bitmap map=null;
-    private double mapWidth=4504;
-    private double subpixelRatio=1.0;
-    private float zoom=0.5f;
-    private int lastX=0;
-    private int lastY=0;
+
     private SensorManager mSensorManager;
     private float[] accelerometerReading = new float[3];
     private float[] magnetometerReading = new float[3];
     private final float[] rotationMatrix = new float[9];
     private final float[] orientationAngles = new float[3];
+    private boolean isVertical;
+    Vibrator v;
+
+
+    //Runnable and the delay before it runs again
+    Handler handler;
+    final int delay = 200;
 
     //lower alpha should equal smoother movement
     private static final float ALPHA = 0.005f;
@@ -58,6 +66,10 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_rotation);
+
+        isVertical = false;
+        v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+
 
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         Sensor accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -68,6 +80,20 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
         if (magneticField != null) {
             mSensorManager.registerListener(this, magneticField, SensorManager.SENSOR_DELAY_NORMAL, SensorManager.SENSOR_DELAY_UI);
         }
+
+        handler = new Handler();
+
+        handler.postDelayed(new Runnable(){
+            public void run(){
+                //do something
+
+
+
+
+
+                handler.postDelayed(this, delay);
+            }
+        }, delay);
 
     }
 
@@ -106,8 +132,18 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
         //current3.setText("" + rotationMatrix[2]);
 
         current1.setText("" + Math.round(Math.toDegrees(orientationAngles[0])));
-        current2.setText("" + Math.round(Math.toDegrees(orientationAngles[1])));
+        current2.setText("" + Math.round(Math.toDegrees(orientationAngles[1] * -1)));
         current3.setText("" + Math.round(Math.toDegrees(orientationAngles[2])));
+
+        //if you hold your phone up, buzz
+        if(((Math.toDegrees(orientationAngles[1] * -1)) - 80) > 1) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                v.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE));
+            } else {
+                //deprecated in API 26
+                v.vibrate(500);
+            }
+        }
 
     }
 
