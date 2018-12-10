@@ -66,11 +66,14 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
     private float deltaX = 0;
     private float deltaY = 0;
     private float deltaZ = 0;
+    private float deltaXMax = 0;
+    private float deltaYMax = 0;
+    private float deltaZMax = 0;
     private float lastX, lastY, lastZ;
 
     private float vibrateThreshold = 0;
     Vibrator v;
-
+    TextView maxY;
 
     //Runnable and the delay before it runs again
     Handler handler;
@@ -88,16 +91,22 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
         isCast = false;
         v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
+        lastX = 0;
+        lastY = 0;
+        lastZ = 0;
 
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         if (accelerometer != null) {
             mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL, SensorManager.SENSOR_DELAY_UI);
+            vibrateThreshold = accelerometer.getMaximumRange() / 2;
         }
         Sensor magneticField = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         if (magneticField != null) {
             mSensorManager.registerListener(this, magneticField, SensorManager.SENSOR_DELAY_NORMAL, SensorManager.SENSOR_DELAY_UI);
         }
+
+        maxY = findViewById(R.id.maxY);
 
         handler = new Handler();
 
@@ -132,6 +141,9 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
         castText.setVisibility(View.INVISIBLE);
         TextView castInstr = findViewById(R.id.instructions);
         castInstr.setVisibility(View.VISIBLE);
+        maxY.setVisibility(View.VISIBLE);
+        TextView title = findViewById(R.id.title);
+        title.setText("Current Acceleration:");
     }
 
     @Override
@@ -189,6 +201,16 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
             }
         }
         else {
+            mSensorManager.unregisterListener(this);
+            mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+            TextView current1 = findViewById(R.id.currentX);
+            TextView current2 = findViewById(R.id.currentY);
+            TextView current3 = findViewById(R.id.currentZ);
+
+            current1.setText("" + Math.round(Math.toDegrees(orientationAngles[0])));
+            current2.setText("" + Math.round(Math.toDegrees(orientationAngles[1] * -1)));
+            current3.setText("" + Math.round(Math.toDegrees(orientationAngles[2])));
+
             //If you cast, then listen for acceleration event in the y axis above a certain threshhold
             // get the change of the x,y,z values of the accelerometer
             deltaX = Math.abs(lastX - event.values[0]);
@@ -196,17 +218,23 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
             deltaZ = Math.abs(lastZ - event.values[2]);
 
             // if the change is below 2, it is just plain noise
-            if (deltaX < 1)
-                deltaX = 0;
-            if (deltaY < 1)
+            if (deltaX < 2)
+                deltaX = 10;
+            if (deltaY < 2)
                 deltaY = 0;
-            if (deltaZ < 1)
+            if (deltaZ < 2)
                 deltaZ = 0;
 
             // set the last know values of x,y,z
             lastX = event.values[0];
             lastY = event.values[1];
             lastZ = event.values[2];
+
+            current1.setText("" + deltaX);
+            current2.setText("" + deltaY);
+            current3.setText("" + deltaZ);
+
+            displayMaxValues();
 
             //One small vibrate means you cast successfully
             vibrate();
@@ -215,11 +243,27 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
 
     }
 
+    public void displayMaxValues() {
+
+        if (deltaY > deltaYMax) {
+            deltaYMax = deltaY;
+            maxY.setText(Float.toString(deltaYMax));
+        }
+
+    }
+
     // if the change in the accelerometer value is big enough, then vibrate!
     // our threshold is MaxValue/2
     public void vibrate() {
-        if ((deltaX > vibrateThreshold) || (deltaY > vibrateThreshold) || (deltaZ > vibrateThreshold)) {
+        if (deltaYMax > 9) {
             v.vibrate(50);
+            TextView castInstr = findViewById(R.id.instructions);
+            castInstr.setText("You cast the net! Wait for the fish to bite then reel it in!");
+            deltaYMax = 0;
+        }
+        else if(deltaYMax > 4){
+            TextView castInstr = findViewById(R.id.instructions);
+            castInstr.setText("Try and cast the net a little farther");
         }
     }
 
