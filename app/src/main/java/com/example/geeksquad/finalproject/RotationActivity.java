@@ -73,6 +73,7 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
     private boolean first;
     private boolean waiting;
     private boolean bite;
+    private float bitingValue = 0;
 
     TextView castInstr;
 
@@ -203,7 +204,7 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
                 lastY = event.values[1];
                 lastZ = event.values[2];
             }
-           else if(!first && !waiting && !bite) {
+           else if(!first && !waiting) {
                 TextView current1 = findViewById(R.id.currentX);
                 TextView current2 = findViewById(R.id.currentY);
                 TextView current3 = findViewById(R.id.currentZ);
@@ -236,11 +237,31 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
                 //One small vibrate means you cast successfully
                 vibrate();
             }
-            else if(!first && waiting) {
-                //If here, you cast the rod with enough force...now we have to shake
-            }
+
+            //You cast the rod, so any motion you do now will add to the biteValue, good or bad. This could either catch the fish or scare it off
             else {
-                //If you here, the line was bit, so shake with all you can left and right, up and down, the total is added and checked after a timer
+
+                //If you cast, then listen for acceleration event in the y axis above a certain threshhold
+                // get the change of the x,y,z values of the accelerometer
+                deltaX = Math.abs(lastX - event.values[0]);
+                deltaY = Math.abs(lastY - event.values[1]);
+                deltaZ = Math.abs(lastZ - event.values[2]);
+
+                // if the change is below 2, it is just plain noise
+                if (deltaX < 2)
+                    deltaX = 0;
+                if (deltaY < 2)
+                    deltaY = 0;
+                if (deltaZ < 2)
+                    deltaZ = 0;
+
+                // set the last know values of x,y,z
+                lastX = event.values[0];
+                lastY = event.values[1];
+                lastZ = event.values[2];
+
+                bitingValue += deltaX + deltaY + deltaZ;
+                //castInstr.setText("" + bitingValue);
             }
 
         }
@@ -264,7 +285,7 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
         if (deltaYMax > 9) {
             v.vibrate(50);
             castInstr = findViewById(R.id.instructions);
-            castInstr.setText("You cast the net! Wait for the fish to bite then reel it in!");
+            castInstr.setText("You cast the net! Hold still to not scare any fish off.");
             deltaYMax = 0;
             waiting = true;
             handler = new Handler();
@@ -274,7 +295,10 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
                     //Create the wait for the bite
                     //I.E....if they move, let the fish get away
 
-
+                    if(bitingValue > 150) {
+                        castInstr.setText("You scared all the fish off, try to hold still next time");
+                        return;
+                    }
 
 
 
@@ -282,20 +306,28 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
                         public void run(){
                             //The fish bit the line! Now shake with all your strength.
                             castInstr.setText("Its biting! Don't let it get away!");
-                            v.vibrate(50);
+                            v.vibrate(150);
+
 
 
 
 
                             handler.postDelayed(new Runnable(){
                                 public void run(){
+
+                                    v.vibrate(150);
+
                                     //Check and see if you caught the fish based on that catching variable
+                                    if(bitingValue < 250) {
+                                        castInstr.setText("It got away!");
+                                        return;
+                                    }
+
+                                    castInstr.setText("Great job, you caught the fish!");
 
 
 
 
-
-                                    handler.postDelayed(this, delay);
                                 }
                             }, delay);
                         }
