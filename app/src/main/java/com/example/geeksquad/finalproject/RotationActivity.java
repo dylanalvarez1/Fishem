@@ -32,6 +32,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -42,16 +43,32 @@ import org.w3c.dom.Text;
 import java.util.ArrayList;
 import java.util.List;
 
+/*
+Plan: Tilt to proper angle to cast...
+You hit the cast button....animation plays or whatever
+hold still....
+after random amount of time, buzz! (you have a small window to shake device as much as you can)(use a handler for this "window" of time)
+(shaking device adds to some value, if some value is high enough at the thresh hold, boom you caught the fish).
+ */
+
 
 
 public class RotationActivity extends AppCompatActivity implements SensorEventListener {
 
     private SensorManager mSensorManager;
+    Sensor accelerometer;
     private float[] accelerometerReading = new float[3];
     private float[] magnetometerReading = new float[3];
     private final float[] rotationMatrix = new float[9];
     private final float[] orientationAngles = new float[3];
     private boolean isVertical;
+    private boolean isCast;
+    private float deltaX = 0;
+    private float deltaY = 0;
+    private float deltaZ = 0;
+    private float lastX, lastY, lastZ;
+
+    private float vibrateThreshold = 0;
     Vibrator v;
 
 
@@ -68,11 +85,12 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
         setContentView(R.layout.activity_rotation);
 
         isVertical = false;
+        isCast = false;
         v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
 
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        Sensor accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         if (accelerometer != null) {
             mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL, SensorManager.SENSOR_DELAY_UI);
         }
@@ -106,45 +124,117 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
         return output;
     }
 
+    public void onCastClick(View view) {
+        isCast = true;
+        Button button = findViewById(R.id.castButton);
+        button.setVisibility(View.INVISIBLE);
+        TextView castText = findViewById(R.id.tiltText);
+        castText.setVisibility(View.INVISIBLE);
+        TextView castInstr = findViewById(R.id.instructions);
+        castInstr.setVisibility(View.VISIBLE);
+    }
+
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            System.arraycopy(event.values, 0, accelerometerReading, 0, accelerometerReading.length);
-            //accelerometerReading = applyLowPassFilter(event.values, accelerometerReading);
+        if(!isCast) {
+            if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+                System.arraycopy(event.values, 0, accelerometerReading, 0, accelerometerReading.length);
+                //accelerometerReading = applyLowPassFilter(event.values, accelerometerReading);
 
-        } else if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
-            System.arraycopy(event.values, 0, magnetometerReading, 0, magnetometerReading.length);
-            //magnetometerReading = applyLowPassFilter(event.values, magnetometerReading);
-        }
+            } else if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+                System.arraycopy(event.values, 0, magnetometerReading, 0, magnetometerReading.length);
+                //magnetometerReading = applyLowPassFilter(event.values, magnetometerReading);
+            }
 
-// Rotation matrix based on current readings from accelerometer and magnetometer.
-        SensorManager.getRotationMatrix(rotationMatrix, null, accelerometerReading, magnetometerReading);
+            // Rotation matrix based on current readings from accelerometer and magnetometer.
+            SensorManager.getRotationMatrix(rotationMatrix, null, accelerometerReading, magnetometerReading);
 
-// Express the updated rotation matrix as three orientation angles.
-        SensorManager.getOrientation(rotationMatrix, orientationAngles);
+            // Express the updated rotation matrix as three orientation angles.
+            SensorManager.getOrientation(rotationMatrix, orientationAngles);
 
-        TextView current1 = findViewById(R.id.currentX);
-        TextView current2 = findViewById(R.id.currentY);
-        TextView current3 = findViewById(R.id.currentZ);
+            TextView current1 = findViewById(R.id.currentX);
+            TextView current2 = findViewById(R.id.currentY);
+            TextView current3 = findViewById(R.id.currentZ);
 
-        //current1.setText("" + rotationMatrix[0]);
-        //current2.setText("" + rotationMatrix[1]);
-        //current3.setText("" + rotationMatrix[2]);
+            //current1.setText("" + rotationMatrix[0]);
+            //current2.setText("" + rotationMatrix[1]);
+            //current3.setText("" + rotationMatrix[2]);
 
-        current1.setText("" + Math.round(Math.toDegrees(orientationAngles[0])));
-        current2.setText("" + Math.round(Math.toDegrees(orientationAngles[1] * -1)));
-        current3.setText("" + Math.round(Math.toDegrees(orientationAngles[2])));
+            current1.setText("" + Math.round(Math.toDegrees(orientationAngles[0])));
+            current2.setText("" + Math.round(Math.toDegrees(orientationAngles[1] * -1)));
+            current3.setText("" + Math.round(Math.toDegrees(orientationAngles[2])));
 
-        //if you hold your phone up, buzz
-        if(((Math.toDegrees(orientationAngles[1] * -1)) - 80) > 1) {
+            //if you hold your phone up, buzz
+            if(((Math.toDegrees(orientationAngles[1] * -1)) - 50) > 0) {
+            /*
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 v.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE));
             } else {
                 //deprecated in API 26
                 v.vibrate(500);
             }
+            */
+                Button button = findViewById(R.id.castButton);
+                button.setVisibility(View.VISIBLE);
+
+                TextView castText = findViewById(R.id.tiltText);
+                castText.setVisibility(View.INVISIBLE);
+            }
+            else {
+                Button button = findViewById(R.id.castButton);
+                button.setVisibility(View.INVISIBLE);
+
+                TextView castText = findViewById(R.id.tiltText);
+                castText.setVisibility(View.VISIBLE);
+            }
+        }
+        else {
+            //If you cast, then listen for acceleration event in the y axis above a certain threshhold
+            // get the change of the x,y,z values of the accelerometer
+            deltaX = Math.abs(lastX - event.values[0]);
+            deltaY = Math.abs(lastY - event.values[1]);
+            deltaZ = Math.abs(lastZ - event.values[2]);
+
+            // if the change is below 2, it is just plain noise
+            if (deltaX < 1)
+                deltaX = 0;
+            if (deltaY < 1)
+                deltaY = 0;
+            if (deltaZ < 1)
+                deltaZ = 0;
+
+            // set the last know values of x,y,z
+            lastX = event.values[0];
+            lastY = event.values[1];
+            lastZ = event.values[2];
+
+            //One small vibrate means you cast successfully
+            vibrate();
         }
 
+
+    }
+
+    // if the change in the accelerometer value is big enough, then vibrate!
+    // our threshold is MaxValue/2
+    public void vibrate() {
+        if ((deltaX > vibrateThreshold) || (deltaY > vibrateThreshold) || (deltaZ > vibrateThreshold)) {
+            v.vibrate(50);
+        }
+    }
+
+    //onResume() register the accelerometer for listening the events
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+    }
+
+    //onPause() unregister the accelerometer for stop listening the events
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mSensorManager.unregisterListener(this);
     }
 
     @Override

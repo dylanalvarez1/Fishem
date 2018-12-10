@@ -18,4 +18,9 @@ public class MainActivity extends AppCompatActivity {
         Intent i = new Intent(getBaseContext(), RotationActivity.class);
         startActivity(i);
     }
+
+    public void onTestButtonClick(View view) {
+        Intent i = new Intent(getBaseContext(), FishingActivity.class);
+        startActivity(i);
+    }
 }
