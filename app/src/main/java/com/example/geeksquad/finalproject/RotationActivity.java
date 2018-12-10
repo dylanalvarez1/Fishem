@@ -71,6 +71,10 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
     private float deltaZMax = 0;
     private float lastX, lastY, lastZ;
     private boolean first;
+    private boolean waiting;
+    private boolean bite;
+
+    TextView castInstr;
 
     private float vibrateThreshold = 0;
     Vibrator v;
@@ -78,7 +82,7 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
 
     //Runnable and the delay before it runs again
     Handler handler;
-    final int delay = 200;
+    final int delay = 2000;
 
     //lower alpha should equal smoother movement
     private static final float ALPHA = 0.005f;
@@ -91,6 +95,8 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
         isVertical = false;
         isCast = false;
         first = true;
+        waiting = false;
+        bite = false;
         v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -106,19 +112,7 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
 
         maxY = findViewById(R.id.maxY);
 
-        handler = new Handler();
 
-        handler.postDelayed(new Runnable(){
-            public void run(){
-                //do something
-
-
-
-
-
-                handler.postDelayed(this, delay);
-            }
-        }, delay);
 
     }
 
@@ -209,7 +203,7 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
                 lastY = event.values[1];
                 lastZ = event.values[2];
             }
-           else {
+           else if(!first && !waiting && !bite) {
                 TextView current1 = findViewById(R.id.currentX);
                 TextView current2 = findViewById(R.id.currentY);
                 TextView current3 = findViewById(R.id.currentZ);
@@ -242,8 +236,15 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
                 //One small vibrate means you cast successfully
                 vibrate();
             }
+            else if(!first && waiting) {
+                //If here, you cast the rod with enough force...now we have to shake
+            }
+            else {
+                //If you here, the line was bit, so shake with all you can left and right, up and down, the total is added and checked after a timer
+            }
 
         }
+
 
 
     }
@@ -262,9 +263,45 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
     public void vibrate() {
         if (deltaYMax > 9) {
             v.vibrate(50);
-            TextView castInstr = findViewById(R.id.instructions);
+            castInstr = findViewById(R.id.instructions);
             castInstr.setText("You cast the net! Wait for the fish to bite then reel it in!");
             deltaYMax = 0;
+            waiting = true;
+            handler = new Handler();
+
+            handler.postDelayed(new Runnable(){
+                public void run(){
+                    //Create the wait for the bite
+                    //I.E....if they move, let the fish get away
+
+
+
+
+
+                    handler.postDelayed(new Runnable(){
+                        public void run(){
+                            //The fish bit the line! Now shake with all your strength.
+                            castInstr.setText("Its biting! Don't let it get away!");
+                            v.vibrate(50);
+
+
+
+
+                            handler.postDelayed(new Runnable(){
+                                public void run(){
+                                    //Check and see if you caught the fish based on that catching variable
+
+
+
+
+
+                                    handler.postDelayed(this, delay);
+                                }
+                            }, delay);
+                        }
+                    }, delay);
+                }
+            }, delay);
         }
         else if(deltaYMax > 4){
             TextView castInstr = findViewById(R.id.instructions);
