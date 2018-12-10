@@ -70,6 +70,7 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
     private float deltaYMax = 0;
     private float deltaZMax = 0;
     private float lastX, lastY, lastZ;
+    private boolean first;
 
     private float vibrateThreshold = 0;
     Vibrator v;
@@ -89,11 +90,8 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
 
         isVertical = false;
         isCast = false;
+        first = true;
         v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-
-        lastX = 0;
-        lastY = 0;
-        lastZ = 0;
 
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -201,43 +199,50 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
             }
         }
         else {
-            mSensorManager.unregisterListener(this);
-            mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-            TextView current1 = findViewById(R.id.currentX);
-            TextView current2 = findViewById(R.id.currentY);
-            TextView current3 = findViewById(R.id.currentZ);
+            if(first) {
+                mSensorManager.unregisterListener(this);
+                mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+                first = false;
 
-            current1.setText("" + Math.round(Math.toDegrees(orientationAngles[0])));
-            current2.setText("" + Math.round(Math.toDegrees(orientationAngles[1] * -1)));
-            current3.setText("" + Math.round(Math.toDegrees(orientationAngles[2])));
+                // set the last know values of x,y,z
+                lastX = event.values[0];
+                lastY = event.values[1];
+                lastZ = event.values[2];
+            }
+           else {
+                TextView current1 = findViewById(R.id.currentX);
+                TextView current2 = findViewById(R.id.currentY);
+                TextView current3 = findViewById(R.id.currentZ);
 
-            //If you cast, then listen for acceleration event in the y axis above a certain threshhold
-            // get the change of the x,y,z values of the accelerometer
-            deltaX = Math.abs(lastX - event.values[0]);
-            deltaY = Math.abs(lastY - event.values[1]);
-            deltaZ = Math.abs(lastZ - event.values[2]);
+                //If you cast, then listen for acceleration event in the y axis above a certain threshhold
+                // get the change of the x,y,z values of the accelerometer
+                deltaX = Math.abs(lastX - event.values[0]);
+                deltaY = Math.abs(lastY - event.values[1]);
+                deltaZ = Math.abs(lastZ - event.values[2]);
 
-            // if the change is below 2, it is just plain noise
-            if (deltaX < 2)
-                deltaX = 10;
-            if (deltaY < 2)
-                deltaY = 0;
-            if (deltaZ < 2)
-                deltaZ = 0;
+                // if the change is below 2, it is just plain noise
+                if (deltaX < 2)
+                    deltaX = 0;
+                if (deltaY < 2)
+                    deltaY = 0;
+                if (deltaZ < 2)
+                    deltaZ = 0;
 
-            // set the last know values of x,y,z
-            lastX = event.values[0];
-            lastY = event.values[1];
-            lastZ = event.values[2];
+                // set the last know values of x,y,z
+                lastX = event.values[0];
+                lastY = event.values[1];
+                lastZ = event.values[2];
 
-            current1.setText("" + deltaX);
-            current2.setText("" + deltaY);
-            current3.setText("" + deltaZ);
+                current1.setText("" + deltaX);
+                current2.setText("" + deltaY);
+                current3.setText("" + deltaZ);
 
-            displayMaxValues();
+                displayMaxValues();
 
-            //One small vibrate means you cast successfully
-            vibrate();
+                //One small vibrate means you cast successfully
+                vibrate();
+            }
+
         }
 
 
