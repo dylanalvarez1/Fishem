@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.drawable.AnimationDrawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -34,6 +35,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.os.Vibrator;
@@ -74,6 +76,10 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
     private boolean waiting;
     private boolean bite;
     private float bitingValue = 0;
+    private AnimationDrawable frameAnimation;
+
+    AnimationDrawable rocketAnimation;
+
 
     TextView castInstr;
 
@@ -112,6 +118,21 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
         }
 
         maxY = findViewById(R.id.maxY);
+
+        frameAnimation= new AnimationDrawable();
+        frameAnimation.setOneShot(true);
+        frameAnimation.addFrame(getResources().getDrawable(R.drawable.castingframe1), 100);
+        frameAnimation.addFrame(getResources().getDrawable(R.drawable.castingframe2), 100);
+        frameAnimation.addFrame(getResources().getDrawable(R.drawable.castingframe3), 100);
+        frameAnimation.addFrame(getResources().getDrawable(R.drawable.castingframe4), 100);
+        frameAnimation.addFrame(getResources().getDrawable(R.drawable.castingframe5), 100);
+        frameAnimation.addFrame(getResources().getDrawable(R.drawable.castingframe6), 100);
+
+       ImageView animateAndroid = (ImageView) findViewById(R.id.fishing_rod);
+       animateAndroid.setBackgroundDrawable(frameAnimation);
+
+
+
 
 
 
@@ -286,54 +307,55 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
             v.vibrate(50);
             castInstr = findViewById(R.id.instructions);
             castInstr.setText("You cast the net! Hold still to not scare any fish off.");
+            frameAnimation.start();
             deltaYMax = 0;
             waiting = true;
             handler = new Handler();
 
             handler.postDelayed(new Runnable(){
                 public void run(){
-                    //Create the wait for the bite
-                    //I.E....if they move, let the fish get away
-
-                    if(bitingValue > 150) {
-                        castInstr.setText("You scared all the fish off, try to hold still next time");
-                        return;
-                    }
-
-
 
                     handler.postDelayed(new Runnable(){
                         public void run(){
-                            //The fish bit the line! Now shake with all your strength.
-                            castInstr.setText("Its biting! Don't let it get away!");
-                            v.vibrate(150);
+                            //Create the wait for the bite
+                            //I.E....if they move, let the fish get away
 
-
-
-
+                            if(bitingValue > 150) {
+                                castInstr.setText("You scared all the fish off, try to hold still next time");
+                                return;
+                            }
 
                             handler.postDelayed(new Runnable(){
                                 public void run(){
-
+                                    //The fish bit the line! Now shake with all your strength.
+                                    castInstr.setText("Its biting! Don't let it get away!");
                                     v.vibrate(150);
 
-                                    //Check and see if you caught the fish based on that catching variable
-                                    if(bitingValue < 250) {
-                                        castInstr.setText("It got away!");
-                                        return;
-                                    }
 
-                                    castInstr.setText("Great job, you caught the fish!");
+                                    handler.postDelayed(new Runnable(){
+                                        public void run(){
 
+                                            v.vibrate(150);
 
+                                            //Check and see if you caught the fish based on that catching variable
+                                            if(bitingValue < 250) {
+                                                castInstr.setText("It got away!");
+                                                return;
+                                            }
 
+                                            castInstr.setText("Great job, you caught the fish!");
 
+                                        }
+                                    }, delay);
                                 }
                             }, delay);
                         }
                     }, delay);
+
                 }
             }, delay);
+
+
         }
         else if(deltaYMax > 4){
             TextView castInstr = findViewById(R.id.instructions);
