@@ -7,14 +7,15 @@
     tools:context=".RotationActivity">
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/linearLayout"
+        android:id="@+id/orientationInfo"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
         android:background="#ffffff"
         android:gravity="center"
         android:orientation="vertical"
-        android:paddingTop="20sp">
+        android:paddingTop="20sp"
+        android:visibility="invisible">
 
         <TextView
             android:id="@+id/title"
@@ -135,7 +136,7 @@
         android:text="Cast"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/linearLayout"
+        app:layout_constraintEnd_toEndOf="@+id/orientationInfo"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -147,10 +148,10 @@
         android:layout_marginEnd="8dp"
         android:text="Tilt the fishing pole at an angle to get ready and cast"
         android:textAlignment="center"
-        app:layout_constraintBottom_toBottomOf="@+id/linearLayout"
-        app:layout_constraintEnd_toEndOf="@+id/linearLayout"
-        app:layout_constraintStart_toStartOf="@+id/linearLayout"
-        app:layout_constraintTop_toTopOf="@+id/linearLayout" />
+        app:layout_constraintBottom_toBottomOf="@+id/orientationInfo"
+        app:layout_constraintEnd_toEndOf="@+id/orientationInfo"
+        app:layout_constraintStart_toStartOf="@+id/orientationInfo"
+        app:layout_constraintTop_toTopOf="@+id/orientationInfo" />
 
     <TextView
         android:id="@+id/instructions"
@@ -163,8 +164,8 @@
         android:text="Move phone in a casting motion"
         android:textAlignment="center"
         android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="@+id/linearLayout"
-        app:layout_constraintEnd_toEndOf="@+id/linearLayout"
+        app:layout_constraintBottom_toBottomOf="@+id/orientationInfo"
+        app:layout_constraintEnd_toEndOf="@+id/orientationInfo"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -180,7 +181,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/tiltText"
         app:layout_constraintStart_toStartOf="@+id/tiltText"
-        app:layout_constraintTop_toTopOf="@+id/linearLayout"
+        app:layout_constraintTop_toTopOf="@+id/orientationInfo"
         app:layout_constraintVertical_bias="0.665" />
 
     <ImageView
@@ -193,6 +194,39 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/reloadButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="Try again"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.827" />
+
+    <Button
+        android:id="@+id/menuButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="64dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="Back to menu"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.502"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.925" />
 
 
 </android.support.constraint.ConstraintLayout>
