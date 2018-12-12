@@ -316,7 +316,7 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
 
         if (deltaY > deltaYMax) {
             deltaYMax = deltaY;
-            maxY.setText(Float.toString(deltaYMax));
+            //maxY.setText(Float.toString(deltaYMax));
         }
 
     }

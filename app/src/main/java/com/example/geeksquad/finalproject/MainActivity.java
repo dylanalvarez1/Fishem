@@ -14,13 +14,15 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
     }
 
+    //The good one
     public void onFishingButtonClick(View view) {
         Intent i = new Intent(getBaseContext(), RotationActivity.class);
         startActivity(i);
     }
 
-    public void onTestButtonClick(View view) {
-        Intent i = new Intent(getBaseContext(), FishingActivity.class);
+    //Open tutorial
+    public void onTutorialButtonClick(View view) {
+        Intent i = new Intent(getBaseContext(), TutorialActivity.class);
         startActivity(i);
     }
 }
