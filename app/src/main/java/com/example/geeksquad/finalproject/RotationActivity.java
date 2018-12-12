@@ -39,6 +39,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.os.Vibrator;
+import java.util.Random;
 
 import org.w3c.dom.Text;
 
@@ -76,6 +77,11 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
     private boolean waiting;
     private boolean bite;
     private float bitingValue = 0;
+    private float bitingOffset;
+    private float timeOffset;
+    private int randomDelay;
+    private int fishType;
+    private String fishName;
     private AnimationDrawable frameAnimation;
     private Button reloadButton;
     private Button menuButton;
@@ -108,6 +114,35 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
         waiting = false;
         bite = false;
         bitingValue = 0;
+        Random rand = new Random();
+        fishType = rand.nextInt(3);
+        randomDelay = 1000 * rand.nextInt(3) + 1;
+        switch(fishType) {
+            case 0:
+                //Hard fish
+                bitingOffset = 100;
+                timeOffset = 1500;
+                fishName = "Shark";
+                break;
+            case 1:
+                //Easier fish
+                bitingOffset = 50;
+                timeOffset = 200;
+                fishName = "Red Snapper";
+                break;
+            case 2:
+                //Easiest fish
+                bitingOffset = -100;
+                timeOffset = -500;
+                fishName = "Boot";
+                break;
+            default:
+                fishName = "Default";
+                timeOffset = 0;
+                bitingOffset = 0;
+
+        }
+
         v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -327,7 +362,8 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
         if (deltaYMax > 9) {
             v.vibrate(50);
             castInstr = findViewById(R.id.instructions);
-            castInstr.setText("You cast the net! Hold still to not scare any fish off.");
+            castInstr.setText("You cast the bait! Hold still to not scare any fish off.");
+            findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
             frameAnimation.start();
             deltaYMax = 0;
             waiting = true;
@@ -335,7 +371,7 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
 
             handler.postDelayed(new Runnable(){
                 public void run(){
-
+                    bitingValue = 0;
                     handler.postDelayed(new Runnable(){
                         public void run(){
                             //Create the wait for the bite
@@ -343,6 +379,7 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
 
                             if(bitingValue > 150) {
                                 castInstr.setText("You scared all the fish off, try to hold still next time");
+                                findViewById(R.id.loadingPanel).setVisibility(View.GONE);
                                 v.vibrate(150);
                                 return;
                             }
@@ -351,7 +388,8 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
                                 public void run(){
                                     //The fish bit the line! Now shake with all your strength.
                                     castInstr.setText("Its biting! Don't let it get away!");
-                                    v.vibrate(2000);
+                                    findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+                                    v.vibrate(delay + (int)timeOffset);
 
 
                                     handler.postDelayed(new Runnable(){
@@ -360,23 +398,23 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
                                             v.vibrate(150);
 
                                             //Check and see if you caught the fish based on that catching variable
-                                            if(bitingValue < 250) {
+                                            if(bitingValue < 250 + bitingOffset) {
                                                 castInstr.setText("It got away!");
                                                 reloadButton.setVisibility(View.VISIBLE);
                                                 menuButton.setVisibility(View.VISIBLE);
                                                 return;
                                             }
 
-                                            castInstr.setText("Great job, you caught the fish!");
+                                            castInstr.setText("Great job, you caught a " + fishName);
                                             reloadButton.setVisibility(View.VISIBLE);
                                             menuButton.setVisibility(View.VISIBLE);
 
                                         }
-                                    }, delay);
+                                    }, delay + (int)timeOffset);
                                 }
-                            }, delay);
+                            }, delay + (int)timeOffset);
                         }
-                    }, delay);
+                    }, delay + randomDelay);
 
                 }
             }, delay);
