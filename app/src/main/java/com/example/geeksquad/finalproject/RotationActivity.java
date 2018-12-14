@@ -106,6 +106,8 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
 
     //ImageView of fishing rod
     ImageView fishingRod;
+    AnimationDrawable waitingAnim;
+    AnimationDrawable reelingAnim;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -165,12 +167,38 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
         //frameAnimation= new AnimationDrawable();
         AnimationDrawable anim = new AnimationDrawable();
         anim.setOneShot(true);
-        anim.addFrame(getResources().getDrawable(R.drawable.castingframe1), 100);
-        anim.addFrame(getResources().getDrawable(R.drawable.castingframe2), 100);
-        anim.addFrame(getResources().getDrawable(R.drawable.castingframe3), 100);
-        anim.addFrame(getResources().getDrawable(R.drawable.castingframe4), 100);
-        anim.addFrame(getResources().getDrawable(R.drawable.castingframe5), 100);
-        anim.addFrame(getResources().getDrawable(R.drawable.castingframe6), 100);
+        anim.addFrame(getResources().getDrawable(R.drawable.castingframe1),  50);
+        anim.addFrame(getResources().getDrawable(R.drawable.castingframe2), 50);
+        anim.addFrame(getResources().getDrawable(R.drawable.castingframe3), 50);
+        anim.addFrame(getResources().getDrawable(R.drawable.castingframe4), 50);
+        anim.addFrame(getResources().getDrawable(R.drawable.castingframe5), 50);
+        anim.addFrame(getResources().getDrawable(R.drawable.castingframe6), 50);
+        anim.addFrame(getResources().getDrawable(R.drawable.castingframe7),  50);
+        anim.addFrame(getResources().getDrawable(R.drawable.castingframe8), 50);
+        anim.addFrame(getResources().getDrawable(R.drawable.castingframe9), 50);
+        anim.addFrame(getResources().getDrawable(R.drawable.castingframe10), 50);
+        anim.addFrame(getResources().getDrawable(R.drawable.castingframe11), 50);
+        anim.addFrame(getResources().getDrawable(R.drawable.castingframe12), 50);
+
+        reelingAnim = new AnimationDrawable();
+        reelingAnim.addFrame(getResources().getDrawable(R.drawable.reel1),  50);
+        reelingAnim.addFrame(getResources().getDrawable(R.drawable.reel2), 50);
+        reelingAnim.addFrame(getResources().getDrawable(R.drawable.reel3), 50);
+        reelingAnim.addFrame(getResources().getDrawable(R.drawable.reel4), 50);
+        reelingAnim.addFrame(getResources().getDrawable(R.drawable.reel5), 50);
+        reelingAnim.addFrame(getResources().getDrawable(R.drawable.reel6), 50);
+        reelingAnim.addFrame(getResources().getDrawable(R.drawable.reel7),  50);
+        reelingAnim.addFrame(getResources().getDrawable(R.drawable.reel8), 50);
+        reelingAnim.addFrame(getResources().getDrawable(R.drawable.reel9), 50);
+        reelingAnim.addFrame(getResources().getDrawable(R.drawable.reel10), 50);
+        reelingAnim.addFrame(getResources().getDrawable(R.drawable.reel11), 50);
+        reelingAnim.addFrame(getResources().getDrawable(R.drawable.reel12), 50);
+
+        waitingAnim = new AnimationDrawable();
+        waitingAnim.addFrame(getResources().getDrawable(R.drawable.wanim1),  50);
+        waitingAnim.addFrame(getResources().getDrawable(R.drawable.wanim2), 50);
+        waitingAnim.addFrame(getResources().getDrawable(R.drawable.wanim3), 50);
+        waitingAnim.addFrame(getResources().getDrawable(R.drawable.wanim4), 50);
 
         frameAnimation = new CustomAnimationDrawableNew(anim) {
             @Override
@@ -416,6 +444,8 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
                                     castInstr.setText("Its biting! Don't let it get away!");
                                     //findViewById(R.id.loadingPanel).setVisibility(View.GONE);
                                     v.vibrate(delay + (int)timeOffset);
+                                    ImageView ripple = findViewById(R.id.ripples);
+                                    ripple.setVisibility(View.VISIBLE);
 
 
                                     handler.postDelayed(new Runnable(){
