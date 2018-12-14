@@ -493,6 +493,7 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
                                             }
                                             //ImageView waitingAnimation = findViewById(R.id.waiting);
                                             //waitingAnimation.setVisibility(View.INVISIBLE);
+                                            /*
                                             fishingRod.setImageResource(0);
                                             fishingRod.setVisibility(View.INVISIBLE);
                                             castInstr.setText("Great job, you caught a " + fishName);
@@ -500,6 +501,27 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
                                             bobber.setVisibility(View.INVISIBLE);
                                             reloadButton.setVisibility(View.VISIBLE);
                                             menuButton.setVisibility(View.VISIBLE);
+                                            */
+                                            switch(fishType) {
+                                                case 0:
+                                                    //Hard fish
+                                                    Intent i = new Intent(getBaseContext(), Result3Activity.class);
+                                                    startActivity(i);
+                                                    break;
+                                                case 1:
+                                                    //Easier fish
+                                                    Intent j = new Intent(getBaseContext(), Result2Activity.class);
+                                                    startActivity(j);
+                                                    break;
+                                                case 2:
+                                                    //Easiest fish
+                                                    Intent k = new Intent(getBaseContext(), Result1Activity.class);
+                                                    startActivity(k);
+                                                    break;
+                                                default:
+
+
+                                            }
 
                                         }
                                     }, delay + (int)timeOffset);
