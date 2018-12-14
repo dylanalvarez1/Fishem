@@ -18,6 +18,7 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.Image;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -82,7 +83,7 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
     private int randomDelay;
     private int fishType;
     private String fishName;
-    private AnimationDrawable frameAnimation;
+    private CustomAnimationDrawableNew frameAnimation;
     private Button reloadButton;
     private Button menuButton;
 
@@ -102,6 +103,9 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
 
     //lower alpha should equal smoother movement
     private static final float ALPHA = 0.005f;
+
+    //ImageView of fishing rod
+    ImageView fishingRod;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -158,17 +162,35 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
 
         maxY = findViewById(R.id.maxY);
 
-        frameAnimation= new AnimationDrawable();
-        frameAnimation.setOneShot(true);
-        frameAnimation.addFrame(getResources().getDrawable(R.drawable.castingframe1), 100);
-        frameAnimation.addFrame(getResources().getDrawable(R.drawable.castingframe2), 100);
-        frameAnimation.addFrame(getResources().getDrawable(R.drawable.castingframe3), 100);
-        frameAnimation.addFrame(getResources().getDrawable(R.drawable.castingframe4), 100);
-        frameAnimation.addFrame(getResources().getDrawable(R.drawable.castingframe5), 100);
-        frameAnimation.addFrame(getResources().getDrawable(R.drawable.castingframe6), 100);
+        //frameAnimation= new AnimationDrawable();
+        AnimationDrawable anim = new AnimationDrawable();
+        anim.setOneShot(true);
+        anim.addFrame(getResources().getDrawable(R.drawable.castingframe1), 100);
+        anim.addFrame(getResources().getDrawable(R.drawable.castingframe2), 100);
+        anim.addFrame(getResources().getDrawable(R.drawable.castingframe3), 100);
+        anim.addFrame(getResources().getDrawable(R.drawable.castingframe4), 100);
+        anim.addFrame(getResources().getDrawable(R.drawable.castingframe5), 100);
+        anim.addFrame(getResources().getDrawable(R.drawable.castingframe6), 100);
 
-       ImageView animateAndroid = (ImageView) findViewById(R.id.fishing_rod);
-       animateAndroid.setBackgroundDrawable(frameAnimation);
+        frameAnimation = new CustomAnimationDrawableNew(anim) {
+            @Override
+            public void onAnimationFinish() {
+                //Make the bobber appear
+                ImageView bobber = findViewById(R.id.bobber);
+                bobber.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onAnimationStart() {
+
+            }
+        };
+        frameAnimation.setOneShot(true);
+
+       fishingRod = (ImageView) findViewById(R.id.fishing_rod);
+       fishingRod.setImageResource(R.drawable.rodidle);
+       //fishingRod.setBackgroundDrawable(frameAnimation);
+       fishingRod.setVisibility(View.INVISIBLE);
 
         reloadButton = (Button)this.findViewById(R.id.reloadButton);
         reloadButton.setOnClickListener(new View.OnClickListener() {
@@ -256,6 +278,7 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
                 v.vibrate(500);
             }
             */
+                fishingRod.setVisibility(View.VISIBLE);
                 Button button = findViewById(R.id.castButton);
                 button.setVisibility(View.VISIBLE);
 
@@ -263,6 +286,7 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
                 castText.setVisibility(View.INVISIBLE);
             }
             else {
+                fishingRod.setVisibility(View.INVISIBLE);
                 Button button = findViewById(R.id.castButton);
                 button.setVisibility(View.INVISIBLE);
 
@@ -363,7 +387,9 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
             v.vibrate(50);
             castInstr = findViewById(R.id.instructions);
             castInstr.setText("You cast the bait! Hold still to not scare any fish off.");
-            findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
+            //findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
+            fishingRod.setBackgroundDrawable(frameAnimation);
+            fishingRod.setImageResource(0);
             frameAnimation.start();
             deltaYMax = 0;
             waiting = true;
@@ -379,7 +405,7 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
 
                             if(bitingValue > 150) {
                                 castInstr.setText("You scared all the fish off, try to hold still next time");
-                                findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+                                //findViewById(R.id.loadingPanel).setVisibility(View.GONE);
                                 v.vibrate(150);
                                 return;
                             }
@@ -388,7 +414,7 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
                                 public void run(){
                                     //The fish bit the line! Now shake with all your strength.
                                     castInstr.setText("Its biting! Don't let it get away!");
-                                    findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+                                    //findViewById(R.id.loadingPanel).setVisibility(View.GONE);
                                     v.vibrate(delay + (int)timeOffset);
 
 

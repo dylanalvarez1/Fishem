@@ -25,4 +25,10 @@ public class MainActivity extends AppCompatActivity {
         Intent i = new Intent(getBaseContext(), TutorialActivity.class);
         startActivity(i);
     }
+
+    //Open credits
+    public void onCreditsButtonClick(View view) {
+        Intent i = new Intent(getBaseContext(), CreditsActivity.class);
+        startActivity(i);
+    }
 }
