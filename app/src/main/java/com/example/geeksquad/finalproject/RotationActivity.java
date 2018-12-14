@@ -168,8 +168,9 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
         AnimationDrawable anim = new AnimationDrawable();
         anim.setOneShot(true);
         anim.addFrame(getResources().getDrawable(R.drawable.castingframe1),  50);
-        anim.addFrame(getResources().getDrawable(R.drawable.castingframe2), 50);
-        anim.addFrame(getResources().getDrawable(R.drawable.castingframe3), 50);
+        anim.addFrame(getResources().getDrawable(R.drawable.castingframe6), 50);
+        anim.addFrame(getResources().getDrawable(R.drawable.castingframe12), 50);
+        /*
         anim.addFrame(getResources().getDrawable(R.drawable.castingframe4), 50);
         anim.addFrame(getResources().getDrawable(R.drawable.castingframe5), 50);
         anim.addFrame(getResources().getDrawable(R.drawable.castingframe6), 50);
@@ -179,26 +180,32 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
         anim.addFrame(getResources().getDrawable(R.drawable.castingframe10), 50);
         anim.addFrame(getResources().getDrawable(R.drawable.castingframe11), 50);
         anim.addFrame(getResources().getDrawable(R.drawable.castingframe12), 50);
+        */
+
 
         reelingAnim = new AnimationDrawable();
         reelingAnim.addFrame(getResources().getDrawable(R.drawable.reel1),  50);
-        reelingAnim.addFrame(getResources().getDrawable(R.drawable.reel2), 50);
-        reelingAnim.addFrame(getResources().getDrawable(R.drawable.reel3), 50);
+        reelingAnim.addFrame(getResources().getDrawable(R.drawable.reel6), 50);
+        reelingAnim.addFrame(getResources().getDrawable(R.drawable.reel12), 50);
+        /*
         reelingAnim.addFrame(getResources().getDrawable(R.drawable.reel4), 50);
         reelingAnim.addFrame(getResources().getDrawable(R.drawable.reel5), 50);
         reelingAnim.addFrame(getResources().getDrawable(R.drawable.reel6), 50);
+
         reelingAnim.addFrame(getResources().getDrawable(R.drawable.reel7),  50);
         reelingAnim.addFrame(getResources().getDrawable(R.drawable.reel8), 50);
         reelingAnim.addFrame(getResources().getDrawable(R.drawable.reel9), 50);
         reelingAnim.addFrame(getResources().getDrawable(R.drawable.reel10), 50);
         reelingAnim.addFrame(getResources().getDrawable(R.drawable.reel11), 50);
         reelingAnim.addFrame(getResources().getDrawable(R.drawable.reel12), 50);
-
+        */
+        /*
         waitingAnim = new AnimationDrawable();
         waitingAnim.addFrame(getResources().getDrawable(R.drawable.wanim1),  50);
         waitingAnim.addFrame(getResources().getDrawable(R.drawable.wanim2), 50);
         waitingAnim.addFrame(getResources().getDrawable(R.drawable.wanim3), 50);
         waitingAnim.addFrame(getResources().getDrawable(R.drawable.wanim4), 50);
+        */
 
         frameAnimation = new CustomAnimationDrawableNew(anim) {
             @Override
@@ -415,6 +422,12 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
             v.vibrate(50);
             castInstr = findViewById(R.id.instructions);
             castInstr.setText("You cast the bait! Hold still to not scare any fish off.");
+
+            //ImageView waitingAnimation = findViewById(R.id.waiting);
+            //waitingAnimation.setVisibility(View.VISIBLE);
+            //waitingAnimation.setImageResource(0);
+            //waitingAnimation.setBackgroundDrawable(waitingAnim);
+
             //findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
             fishingRod.setBackgroundDrawable(frameAnimation);
             fishingRod.setImageResource(0);
@@ -434,7 +447,13 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
                             if(bitingValue > 150) {
                                 castInstr.setText("You scared all the fish off, try to hold still next time");
                                 //findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+                                //ImageView waitingAnimation = findViewById(R.id.waiting);
+                                //waitingAnimation.setVisibility(View.INVISIBLE);
                                 v.vibrate(150);
+                                ImageView bobber = findViewById(R.id.bobber);
+                                bobber.setVisibility(View.INVISIBLE);
+                                //findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
+                                fishingRod.setImageResource(0);
                                 return;
                             }
 
@@ -443,9 +462,15 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
                                     //The fish bit the line! Now shake with all your strength.
                                     castInstr.setText("Its biting! Don't let it get away!");
                                     //findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+                                    //ImageView waitingAnimation = findViewById(R.id.waiting);
+                                    //waitingAnimation.setVisibility(View.INVISIBLE);
                                     v.vibrate(delay + (int)timeOffset);
                                     ImageView ripple = findViewById(R.id.ripples);
                                     ripple.setVisibility(View.VISIBLE);
+                                    //findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
+                                    frameAnimation.stop();
+                                    fishingRod.setBackgroundDrawable(reelingAnim);
+                                    reelingAnim.start();
 
 
                                     handler.postDelayed(new Runnable(){
@@ -456,12 +481,23 @@ public class RotationActivity extends AppCompatActivity implements SensorEventLi
                                             //Check and see if you caught the fish based on that catching variable
                                             if(bitingValue < 250 + bitingOffset) {
                                                 castInstr.setText("It got away!");
+                                                //ImageView waitingAnimation = findViewById(R.id.waiting);
+                                                //waitingAnimation.setVisibility(View.INVISIBLE);
                                                 reloadButton.setVisibility(View.VISIBLE);
                                                 menuButton.setVisibility(View.VISIBLE);
+                                                ImageView bobber = findViewById(R.id.bobber);
+                                                bobber.setVisibility(View.INVISIBLE);
+                                                fishingRod.setImageResource(0);
+                                                fishingRod.setVisibility(View.INVISIBLE);
                                                 return;
                                             }
-
+                                            //ImageView waitingAnimation = findViewById(R.id.waiting);
+                                            //waitingAnimation.setVisibility(View.INVISIBLE);
+                                            fishingRod.setImageResource(0);
+                                            fishingRod.setVisibility(View.INVISIBLE);
                                             castInstr.setText("Great job, you caught a " + fishName);
+                                            ImageView bobber = findViewById(R.id.bobber);
+                                            bobber.setVisibility(View.INVISIBLE);
                                             reloadButton.setVisibility(View.VISIBLE);
                                             menuButton.setVisibility(View.VISIBLE);
 

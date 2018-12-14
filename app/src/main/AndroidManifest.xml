@@ -21,7 +21,10 @@
         <activity android:name=".FishingActivity" />
         <activity android:name=".RotationActivity" />
         <activity android:name=".TutorialActivity" />
-        <activity android:name=".CreditsActivity"></activity>
+        <activity android:name=".CreditsActivity" />
+        <activity android:name=".Result1Activity" />
+        <activity android:name=".Result2Activity" />
+        <activity android:name=".Result3Activity"></activity>
     </application>
 
 </manifest>
